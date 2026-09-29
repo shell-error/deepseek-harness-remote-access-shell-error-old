@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeepSeek Harness Remote Access"
+  short_description: "Add LAN approval and SSH remote workspaces"
+  default_prompt: "Use $deepseek-harness-remote-access to implement or audit LAN access authorization and SSH-backed workspaces in this DeepSeek Harness checkout."
