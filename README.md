@@ -1,5 +1,9 @@
 # DeepSeek Harness Remote Access Skill
 
+> 面向 DeepSeek Harness 的 Codex Skill：提供局域网访问授权与 SSH 远程工作区能力。
+>
+> 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
+
 A Codex skill for extending [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) with:
 
 - network access authorization for LAN clients, including a waiting page, durable allow list, WebSocket gates, and a Settings panel;
@@ -55,6 +59,7 @@ The validation also found and documented three implementation pitfalls: preservi
 The legacy SSH implementation makes the filesystem and workspace remote-aware. Its bash, pwsh, and terminal backends still run on the Harness host. Use the current upstream `subprocess-ssh` and `sandbox-ssh` providers when remote command execution is required.
 
 Chinese overview: [README.zh-CN.md](README.zh-CN.md).
+
 
 
 
