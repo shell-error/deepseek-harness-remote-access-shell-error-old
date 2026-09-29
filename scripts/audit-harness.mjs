@@ -42,13 +42,13 @@ function check(label, ok, detail) {
 }
 
 if (!exists('package.json')) {
-  console.error(`not a DeepSeek Harness checkout: no package.json under ${root}`)
+  console.error(`不是 DeepSeek Harness 仓库：以下路径没有 package.json ${root}`)
   process.exit(2)
 }
 
 const pkg = packageJson('package.json')
 if (pkg?.name !== '@deepseek-ai/dsh-root') {
-  console.error(`unexpected package name: ${String(pkg?.name)}`)
+  console.error(`package name 不符合预期: ${String(pkg?.name)}`)
   process.exit(2)
 }
 
@@ -67,18 +67,18 @@ const lan = {
   hostTest: exists('packages/client/ui-settings-lan-access/tests/lan-access.host.spec.ts'),
 }
 lan.checks = [
-  check('dual-face package exists', lan.package),
-  check('host request gate exists', lan.hostHalf),
-  check('durable allow-list exists', lan.durableStore),
-  check('waiting/refusal page exists', lan.waitingPage),
-  check('settings section exists', lan.settingsSection),
-  check('webserver gate seam exists', lan.gateSeam),
-  check('--allow-lan parser exists', lan.allowLanFlag),
-  check('Web bundle depends on plugin', lan.bundleDependency),
-  check('Web bundle mounts plugin', lan.bundleRow),
-  check('API trust derives LAN authorities', lan.dynamicApiTrust),
-  check('insecure-context browser shim exists', lan.secureContextShim),
-  check('host security/persistence tests exist', lan.hostTest),
+  check('双面包存在', lan.package),
+  check('宿主请求门存在', lan.hostHalf),
+  check('持久化白名单存在', lan.durableStore),
+  check('等待/拒绝页面存在', lan.waitingPage),
+  check('设置页 section 存在', lan.settingsSection),
+  check('webserver gate seam 存在', lan.gateSeam),
+  check('--allow-lan 参数解析存在', lan.allowLanFlag),
+  check('Web bundle 依赖插件', lan.bundleDependency),
+  check('Web bundle 已挂载插件', lan.bundleRow),
+  check('API 信任栅栏会推导 LAN authority', lan.dynamicApiTrust),
+  check('非 secure context 浏览器 shim 存在', lan.secureContextShim),
+  check('宿主安全/持久化测试存在', lan.hostTest),
 ]
 lan.complete = lan.checks.every((entry) => entry.ok)
 
@@ -107,33 +107,33 @@ ssh.mode = ssh.sandboxProvider && ssh.subprocessProvider
     : 'absent'
 ssh.remoteExecution = ssh.mode === 'modern-provider-family' || ssh.subprocessProvider
 ssh.checks = [
-  check('SSH backend exists', ssh.legacySeam || ssh.mode === 'modern-provider-family'),
-  check('remote filesystem provider exists', ssh.filesystemProvider),
-  check('RPC contract and methods exist', ssh.apiContract && ssh.rpcMethods),
-  check('client workspaces service exposes SSH calls', ssh.clientService),
-  check('workspace picker device switcher exists', ssh.pickerDeviceMenu),
-  check('host directory picker resolves remote targets', ssh.remoteBrowse),
-  check('workspace URI canonicalization exists', ssh.workspaceUri),
-  check('session cwd accepts remote schemes', ssh.sessionUri),
-  check('sandbox policy preserves remote roots', ssh.sandboxUri),
-  check('host process cwd guards exist', ssh.hostCwdGuard),
-  check('remote shell/subprocess provider exists', ssh.remoteExecution, ssh.remoteExecution ? undefined : 'legacy filesystem-only mode'),
+  check('SSH 后端存在', ssh.legacySeam || ssh.mode === 'modern-provider-family'),
+  check('远端文件系统 provider 存在', ssh.filesystemProvider),
+  check('RPC 契约和方法存在', ssh.apiContract && ssh.rpcMethods),
+  check('客户端 workspaces service 暴露 SSH 调用', ssh.clientService),
+  check('工作区选择器设备切换器存在', ssh.pickerDeviceMenu),
+  check('宿主目录选择器可解析远端目标', ssh.remoteBrowse),
+  check('workspace URI 规范化存在', ssh.workspaceUri),
+  check('session cwd 接受远端 scheme', ssh.sessionUri),
+  check('sandbox policy 保留远端 root', ssh.sandboxUri),
+  check('宿主进程 cwd 保护存在', ssh.hostCwdGuard),
+  check('远端 shell/subprocess provider 存在', ssh.remoteExecution, ssh.remoteExecution ? undefined : '旧版仅远端文件系统模式'),
 ]
-ssh.integrationComplete = ssh.checks.filter((entry) => entry.label !== 'remote shell/subprocess provider exists').every((entry) => entry.ok)
+ssh.integrationComplete = ssh.checks.filter((entry) => entry.label !== '远端 shell/subprocess provider 存在').every((entry) => entry.ok)
 ssh.complete = ssh.integrationComplete && ssh.remoteExecution
 
 const actions = []
 const warnings = []
 if (!lan.complete) {
-  actions.push('Implement or finish network access authorization using references/lan-access.md, including the webserver gate, bundle rows, --allow-lan, dynamic API trust, and secure-context shim.')
+  actions.push('请按 references/lan-access.md 实现或完成局域网访问授权，包括 webserver gate、bundle row、--allow-lan、动态 API 信任和 secure-context shim。')
 }
 if (ssh.mode === 'absent') {
-  actions.push('Choose the SSH architecture first: use the current provider family when present upstream, otherwise port the legacy registry/filesystem design from references/ssh-workspaces.md.')
+  actions.push('先选择 SSH 架构：上游已有新版 provider family 时直接复用；否则按 references/ssh-workspaces.md 迁移旧版 registry/filesystem 设计。')
 } else if (!ssh.integrationComplete) {
-  actions.push('Complete the SSH workspace integration across RPC, client workspace service, picker, URI/workspace validation, sandbox policy, and tests.')
+  actions.push('补齐 SSH workspace 在 RPC、客户端 workspace service、picker、URI/workspace 校验、sandbox policy 和测试中的接线。')
 }
 if (ssh.mode !== 'absent' && !ssh.remoteExecution) {
-  const boundary = 'Do not claim full remote execution: the detected legacy setup only remotes filesystem-backed workspace operations. Add subprocess/terminal providers for remote commands.'
+  const boundary = '不要宣称支持完整远端执行：检测到旧版方案只远端化文件系统工作区操作。需要远端命令时请添加 subprocess/terminal provider。'
   if (requireRemoteShell) actions.push(boundary)
   else warnings.push(boundary)
 }
@@ -150,31 +150,32 @@ const report = {
 if (json) {
   console.log(JSON.stringify(report, null, 2))
 } else {
-  console.log('DeepSeek Harness Remote Access Audit')
-  console.log(`Root: ${root}`)
-  console.log(`Version: ${report.harnessVersion ?? 'unknown'}`)
+  console.log('DeepSeek Harness 局域网和远程工作区审计')
+  console.log(`仓库根目录： ${root}`)
+  console.log(`版本： ${report.harnessVersion ?? '未知'}`)
   console.log('')
-  console.log('Network access authorization')
+  console.log('局域网访问授权')
   for (const entry of lan.checks) console.log(`  ${entry.ok ? '[x]' : '[ ]'} ${entry.label}${entry.detail ? ` (${entry.detail})` : ''}`)
   console.log('')
-  console.log('SSH-backed workspaces')
-  console.log(`  mode: ${ssh.mode}`)
+  console.log('SSH 远程工作区')
+  console.log(`  模式： ${ssh.mode}`)
   for (const entry of ssh.checks) console.log(`  ${entry.ok ? '[x]' : '[ ]'} ${entry.label}${entry.detail ? ` (${entry.detail})` : ''}`)
   if (warnings.length > 0) {
     console.log('')
-    console.log('Boundaries and warnings')
+    console.log('边界与警告')
     for (const warning of warnings) console.log(`  - ${warning}`)
   }
   console.log('')
   if (actions.length === 0) {
-    console.log('No missing capability wiring detected. Run the package and end-to-end tests next.')
+    console.log('未发现缺失的能力接线。下一步运行包级测试和端到端测试。')
   } else {
-    console.log('Recommended next actions')
+    console.log('建议的下一步')
     for (const action of actions) console.log(`  - ${action}`)
   }
 }
 
 if ((strict && actions.length > 0) || (requireRemoteShell && !ssh.remoteExecution)) process.exit(1)
+
 
 
 

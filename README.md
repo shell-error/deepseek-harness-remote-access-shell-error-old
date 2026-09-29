@@ -1,65 +1,70 @@
-# DeepSeek Harness Remote Access Skill
+# DeepSeek Harness 局域网和远程工作区
 
-> 面向 DeepSeek Harness 的 Codex Skill：提供局域网访问授权与 SSH 远程工作区能力。
->
-> 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
+面向 DeepSeek Harness 的 Codex Skill，用于实现两套远程访问能力：
 
-A Codex skill for extending [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) with:
+- **局域网访问授权**：等待授权页、持久化白名单、WebSocket 升级拦截，以及设置页中的批准、拒绝、撤销和删除。
+- **SSH 远程工作区**：SSH 设备注册、`ssh://<connectionId>/<absolute path>` 工作区标识、远端目录浏览、远端文件读写和沙箱边界。
 
-- network access authorization for LAN clients, including a waiting page, durable allow list, WebSocket gates, and a Settings panel;
-- SSH-backed workspace selection, including a device registry, `ssh://` workspace identity, remote directory browsing, and filesystem integration.
+## 名称与别名
 
-The skill is version-aware. It prefers the current upstream `packages/ssh/*` provider family when present and documents the legacy multi-device `ssh2` implementation captured against `dsh-v0.1.1-rc.2`.
+| 位置 | 值 |
+| --- | --- |
+| 显示名称 | `DeepSeek Harness 局域网和远程工作区` |
+| Skill 名 / GitHub 别名 | `deepseek-harness-remote-access` |
 
-## Install
+`name` 和仓库路径必须继续使用 kebab-case 英文别名，以保证 Codex、GitHub 和 Harness 加载器兼容；用户界面和文档显示中文名称。
 
-Clone or copy this directory into your Codex skills directory so the folder name is `deepseek-harness-remote-access`:
+## 安装
+
+将仓库克隆或复制到 Codex 技能目录，文件夹名称保持为别名：
 
 ```text
 $CODEX_HOME/skills/deepseek-harness-remote-access/
 ```
 
-If `CODEX_HOME` is unset, the usual location is `~/.codex/skills/`.
-
-## Use
+如果未设置 `CODEX_HOME`，通常对应：
 
 ```text
-Use $deepseek-harness-remote-access to implement LAN access authorization and SSH-backed workspaces in this DeepSeek Harness checkout.
+~/.codex/skills/deepseek-harness-remote-access/
 ```
 
-The skill routes work through:
+## 使用
 
-- `references/platform-integration.md`
-- `references/lan-access.md`
-- `references/ssh-workspaces.md`
-- `references/source-map.md`
+```text
+使用 $deepseek-harness-remote-access 在当前 DeepSeek Harness 仓库中实现局域网访问授权和 SSH 远程工作区。
+```
 
-## Audit an Existing Checkout
+Skill 会根据任务加载：
+
+- [平台集成说明](references/platform-integration.md)
+- [局域网访问授权](references/lan-access.md)
+- [SSH 远程工作区](references/ssh-workspaces.md)
+- [源码接线映射](references/source-map.md)
+
+## 审计现有仓库
 
 ```sh
 node scripts/audit-harness.mjs /path/to/deepseek-harness
 ```
 
-Use `--json` for machine-readable output, `--strict` in CI, or `--require-remote-shell` when remote command execution is mandatory.
+可选参数：
 
-## Verified
+- `--json`：输出机器可读 JSON
+- `--strict`：核心接线缺失时返回失败
+- `--require-remote-shell`：把远端命令执行作为硬性要求
 
-This skill was validated against a real DeepSeek Harness checkout and the associated Web application:
+## 验证情况
 
-- focused regression suite: 170 passed, 1 platform-specific test skipped;
-- `pnpm run build:lib` completed successfully;
-- LAN waiting page, approve, revoke, deny, re-request, forget, persistence, and loopback-only management were exercised;
-- a registered SSH device completed probe, remote directory listing, file create/read/edit, relative path resolution, and workspace creation;
-- cross-workspace remote writes were denied under `Workspace Write`.
+该 Skill 已在真实 DeepSeek Harness 仓库和 Web 应用上验证：
 
-The validation also found and documented three implementation pitfalls: preserving remote sandbox roots, mapping `ssh2` numeric SFTP status codes, and using OpenSSH atomic-overwrite rename for remote edits.
+- 聚焦回归测试：170 个通过，1 个平台不适用用例跳过；
+- `pnpm run build:lib` 构建通过；
+- 局域网等待页、批准、撤销、拒绝、重新申请、删除、持久化和仅回环管理均已验证；
+- 已注册 SSH 设备完成连接探测、远端目录浏览、文件创建/读取/编辑、相对路径解析和工作区创建；
+- `Workspace Write` 模式下跨工作区远端写入会被拒绝。
 
-## Important Boundary
+验证同时确认了三个容易踩坑的实现细节：保留远端 sandbox root、映射 `ssh2` 数字 SFTP 状态码，以及使用 OpenSSH 原子覆盖 rename 完成远端编辑。
 
-The legacy SSH implementation makes the filesystem and workspace remote-aware. Its bash, pwsh, and terminal backends still run on the Harness host. Use the current upstream `subprocess-ssh` and `sandbox-ssh` providers when remote command execution is required.
+## 重要边界
 
-Chinese overview: [README.zh-CN.md](README.zh-CN.md).
-
-
-
-
+旧版 SSH 实现会让文件系统和 workspace 感知远端路径，但 `bash`、`pwsh` 和终端仍运行在 Harness 主机上。如果需要完整远端命令执行，应使用当前上游的 `subprocess-ssh` 和 `sandbox-ssh` provider。
